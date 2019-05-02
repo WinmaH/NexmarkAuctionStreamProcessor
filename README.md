@@ -5,4 +5,8 @@ over the generated data. More details on this data generator can be found [here]
 
 NexmarkAuctionStreamProcessor is designed to generate the auction data such that the data can be sent to a kafka topic.There are 3 majosr streams of data as Person, OpenAuction and Bid.
 
-[link to Google!](/home/winma/Screenshot from 2019-05-02 16-47-00.png)
+##Build the Benchmark
+mvn clean install -Dcheckstyle.skip=true -Dfindbugs.skip=true
+
+##Run the benchmark
+sh run-loader.sh
