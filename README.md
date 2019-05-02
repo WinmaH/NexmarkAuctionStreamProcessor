@@ -10,7 +10,7 @@ NexmarkAuctionStreamProcessor is designed to generate the auction data such that
 mvn clean install -Dcheckstyle.skip=true -Dfindbugs.skip=true
 ```
 
-###Run the benchmark
+### Run the benchmark
 ```
 sh run-loader.sh
 ```
