@@ -34,6 +34,7 @@ package org.wso2.siddhi.common.benchmarks.http;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -72,15 +73,22 @@ class AuctionStreamGenerator extends Thread{
     private static int WARP = 10;
     private static int DELAY = 24000;
 
-    public static int DEFAULT_GEN_CALLS = 20;
+    public static int DEFAULT_GEN_CALLS = 100;
     public static boolean DEFAULT_PRETTYPRINT = true;
 
     public boolean LIMIT_ATTRIBUTES = false;
     private static final Logger log = Logger.getLogger(AuctionStreamGenerator.class);
+    AuctionStreamGenerator auctionStreamGenerator;
 
     Producer<String, String> producer1 = KafkaMessageSender.createProducer();
 //    Producer<String, String> producer2 = KafkaMessageSender.createProducer();
 //    Producer<String, String> producer3 = KafkaMessageSender.createProducer();
+    static final ReentrantLock lock = new ReentrantLock();
+   // private OpenAuctions openAuctions = new OpenAuctions(cal);
+
+    long startTime2;
+    private int temp = 0;
+    private int noOfPartialSosddhiApps = 9;
 
     public AuctionStreamGenerator(int genCalls, boolean prettyprint){
 	 
@@ -94,6 +102,34 @@ class AuctionStreamGenerator extends Thread{
             tab3 = "\t\t\t";
             nl = "\n";
         }
+        auctionStreamGenerator = this;
+    }
+
+    public AuctionStreamGenerator(int genCalls, boolean prettyprint, AuctionStreamGenerator auctionStreamGenerator){
+
+        numGenCalls = genCalls;
+        usePrettyPrint = prettyprint;
+        //openAuctions = new OpenAuctions(cal);
+        openAuctions = auctionStreamGenerator.openAuctions;
+        if(usePrettyPrint) {
+            tab = "\t";
+            tab2 = "\t\t";
+            tab3 = "\t\t\t";
+            nl = "\n";
+        }
+        this.auctionStreamGenerator = auctionStreamGenerator;
+    }
+
+    public void incrementCommon() {
+        auctionStreamGenerator.temp++;
+
+        if (auctionStreamGenerator.temp == 1) {
+            auctionStreamGenerator.startTime2 = System.currentTimeMillis();
+        }
+        long diff = System.currentTimeMillis() - auctionStreamGenerator.startTime2;
+        log.info(Thread.currentThread().getName() + " spent : "
+                + diff + " for the event count : " + auctionStreamGenerator.temp
+                + " with the  Data rate : " + (auctionStreamGenerator.temp * 1000  / diff));
     }
 
     public static void main (String args[]){
@@ -102,10 +138,10 @@ class AuctionStreamGenerator extends Thread{
         log.info("Welcome to kafka message sender");
 
         AuctionStreamGenerator auctionStreamGenerator1 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT);
-        AuctionStreamGenerator auctionStreamGenerator2 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT);
-        AuctionStreamGenerator auctionStreamGenerator3 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT);
-        AuctionStreamGenerator auctionStreamGenerator4 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT);
-        AuctionStreamGenerator auctionStreamGenerator5 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT);
+        AuctionStreamGenerator auctionStreamGenerator2 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator3 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator4 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator5 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
         auctionStreamGenerator1.start();
         auctionStreamGenerator2.start();
         auctionStreamGenerator3.start();
@@ -221,7 +257,8 @@ class AuctionStreamGenerator extends Thread{
 
             jsonDataItem.append("\"time\"");
             jsonDataItem.append(":");
-            jsonDataItem.append(cal.getTimeInSecs());
+           // jsonDataItem.append(cal.getTimeInSecs());
+            jsonDataItem.append(System.currentTimeMillis() - rnd.nextInt(MAXINCREMENT_MILLISEC));
             jsonDataItem.append(",");
 
 
@@ -242,7 +279,7 @@ class AuctionStreamGenerator extends Thread{
                 log.info("Message from Stream3 sent to kafaka by "
                         + Thread.currentThread().getName());
     
-               // incrementCommon();
+               incrementCommon();
     
     
     
@@ -281,9 +318,11 @@ class AuctionStreamGenerator extends Thread{
         
             
             StringBuilder jsonDataItem = new StringBuilder();
-            
 
+
+            lock.lock();
             int auctionId = openAuctions.getNewId();
+            lock.unlock();
 
 
             jsonDataItem.append("{ \"event\": { ");
@@ -297,7 +336,11 @@ class AuctionStreamGenerator extends Thread{
             jsonDataItem.append(":");
             jsonDataItem.append(auctionId);
             jsonDataItem.append(",");
-            
+
+            jsonDataItem.append("\"partition_id\"");
+            jsonDataItem.append(":");
+            jsonDataItem.append(auctionId%noOfPartialSosddhiApps);
+            jsonDataItem.append(",");
 
 
             // no initial - does not fit our scenario
@@ -406,14 +449,17 @@ class AuctionStreamGenerator extends Thread{
 
                 jsonDataItem.append("\"starting\"");
                 jsonDataItem.append(":");
-                jsonDataItem.append(cal.getTimeInSecs());
+                //jsonDataItem.append(cal.getTimeInSecs());
+                jsonDataItem.append(System.currentTimeMillis());
                 jsonDataItem.append(",");
 
                 
                 jsonDataItem.append("\"ending\"");
                 jsonDataItem.append(":");
-                jsonDataItem.append(openAuctions.getEndTime(auctionId));
-                //jsonDataItem.append(",");
+                //jsonDataItem.append(openAuctions.getEndTime(auctionId));
+                jsonDataItem.append(System.currentTimeMillis() * WARP + DELAY + rnd.nextInt(MAXINCREMENT_MILLISEC));
+
+
 
 
             }
@@ -426,7 +472,7 @@ class AuctionStreamGenerator extends Thread{
                 log.info("Message from Stream2 sent to kafaka by "
                         + Thread.currentThread().getName());
     
-               // incrementCommon();
+               incrementCommon();
     
     
     
@@ -675,7 +721,7 @@ class AuctionStreamGenerator extends Thread{
                 log.info("Message from Stream1 sent to kafaka by "
                         + Thread.currentThread().getName());
     
-               // incrementCommon();
+               incrementCommon();
     
 
                 try {
