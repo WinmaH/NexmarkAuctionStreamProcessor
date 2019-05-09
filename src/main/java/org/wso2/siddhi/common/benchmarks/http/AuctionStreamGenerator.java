@@ -73,7 +73,7 @@ class AuctionStreamGenerator extends Thread{
     private static int WARP = 10;
     private static int DELAY = 24000;
 
-    public static int DEFAULT_GEN_CALLS = 100;
+    public static int DEFAULT_GEN_CALLS = 2000;
     public static boolean DEFAULT_PRETTYPRINT = true;
 
     public boolean LIMIT_ATTRIBUTES = false;
@@ -142,11 +142,21 @@ class AuctionStreamGenerator extends Thread{
         AuctionStreamGenerator auctionStreamGenerator3 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
         AuctionStreamGenerator auctionStreamGenerator4 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
         AuctionStreamGenerator auctionStreamGenerator5 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator6 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator7 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator8 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator9 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
+        AuctionStreamGenerator auctionStreamGenerator10 = new AuctionStreamGenerator(DEFAULT_GEN_CALLS,DEFAULT_PRETTYPRINT, auctionStreamGenerator1);
         auctionStreamGenerator1.start();
         auctionStreamGenerator2.start();
         auctionStreamGenerator3.start();
         auctionStreamGenerator4.start();
         auctionStreamGenerator5.start();
+        auctionStreamGenerator6.start();
+        auctionStreamGenerator7.start();
+        auctionStreamGenerator8.start();
+        auctionStreamGenerator9.start();
+        auctionStreamGenerator10.start();
 
     }
 
@@ -190,7 +200,7 @@ class AuctionStreamGenerator extends Thread{
             // one bid per loop
             if(rnd.nextInt(10) == 0) {
                 generatePerson(1);
-            } 
+            }
 	    
             // want on average 1 item and 10 bids
             int numItems = rnd.nextInt(3); // should average 1
@@ -242,6 +252,11 @@ class AuctionStreamGenerator extends Thread{
             jsonDataItem.append("\"auction_id\"");
             jsonDataItem.append(":");
             jsonDataItem.append(itemId);
+            jsonDataItem.append(",");
+
+            jsonDataItem.append("\"partition_id\"");
+            jsonDataItem.append(":");
+            jsonDataItem.append(itemId%4);
             jsonDataItem.append(",");
 
 
@@ -468,11 +483,11 @@ class AuctionStreamGenerator extends Thread{
             try {
 
     
-                KafkaMessageSender.runProducer2(jsonDataItem.toString(),producer1);
-                log.info("Message from Stream2 sent to kafaka by "
-                        + Thread.currentThread().getName());
+//                KafkaMessageSender.runProducer2(jsonDataItem.toString(),producer1);
+//                log.info("Message from Stream2 sent to kafaka by "
+//                        + Thread.currentThread().getName());
     
-               incrementCommon();
+ //              incrementCommon();
     
     
     
@@ -482,8 +497,8 @@ class AuctionStreamGenerator extends Thread{
                     log.info("Error: " + e.getMessage());
                 }
     
-            } catch (InterruptedException e) {
-                log.error("Error sending an event to Input Handler, " + e.getMessage(), e);
+//            } catch (InterruptedException e) {
+//                log.error("Error sending an event to Input Handler, " + e.getMessage(), e);
             } catch (Exception e) {
                 log.error("Error: " + e.getMessage(), e);
             }
@@ -717,11 +732,11 @@ class AuctionStreamGenerator extends Thread{
             jsonDataItem.append(" } }");
             try {
     
-                KafkaMessageSender.runProducer1(jsonDataItem.toString(),producer1);
-                log.info("Message from Stream1 sent to kafaka by "
-                        + Thread.currentThread().getName());
-    
-               incrementCommon();
+//                KafkaMessageSender.runProducer1(jsonDataItem.toString(),producer1);
+//                log.info("Message from Stream1 sent to kafaka by "
+//                        + Thread.currentThread().getName());
+//
+//               incrementCommon();
     
 
                 try {
@@ -730,8 +745,8 @@ class AuctionStreamGenerator extends Thread{
                     log.info("Error: " + e.getMessage());
                 }
     
-            } catch (InterruptedException e) {
-                log.error("Error sending an event to Input Handler, " + e.getMessage(), e);
+//            } catch (InterruptedException e) {
+//                log.error("Error sending an event to Input Handler, " + e.getMessage(), e);
             } catch (Exception e) {
                 log.error("Error: " + e.getMessage(), e);
             }
