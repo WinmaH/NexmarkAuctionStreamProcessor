@@ -73,7 +73,7 @@ class AuctionStreamGenerator extends Thread{
     private static int WARP = 10;
     private static int DELAY = 24000;
 
-    public static int DEFAULT_GEN_CALLS = 2000;
+    public static int DEFAULT_GEN_CALLS = 3000;
     public static boolean DEFAULT_PRETTYPRINT = true;
 
     public boolean LIMIT_ATTRIBUTES = false;
@@ -289,8 +289,16 @@ class AuctionStreamGenerator extends Thread{
             jsonDataItem.append(" } }");
             try {
 
-    
-                KafkaMessageSender.runProducer3(jsonDataItem.toString(),producer1);
+                if((int)Thread.currentThread().getId()%4 == 0) {
+                    KafkaMessageSender.runProducer1(jsonDataItem.toString(),producer1);
+                } else if ((int)Thread.currentThread().getId()%4 == 1) {
+                    KafkaMessageSender.runProducer2(jsonDataItem.toString(),producer1);
+                } else if ((int)Thread.currentThread().getId()%4 == 2) {
+                    KafkaMessageSender.runProducer3(jsonDataItem.toString(),producer1);
+                } else {
+                    KafkaMessageSender.runProducer4(jsonDataItem.toString(),producer1);
+                }
+
                 log.info("Message from Stream3 sent to kafaka by "
                         + Thread.currentThread().getName());
     

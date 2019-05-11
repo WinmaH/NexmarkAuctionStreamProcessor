@@ -17,6 +17,7 @@ public class KafkaMessageSender {
     private static final String TOPIC1 = "test15";
     private static final String TOPIC2 = "test16";
     private static final String TOPIC3 = "test17";
+    private static final String TOPIC4 = "test18";
     private static final Logger log = Logger.getLogger(KafkaMessageSender.class);
 
     public static Producer<String, String> createProducer() {
@@ -65,6 +66,20 @@ public class KafkaMessageSender {
 
         //final Producer<String, String> producer = createProducer();
         ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC3, jSON);
+
+        try {
+            producer.send(record, null);
+            producer.flush();
+            //log.info("Message sent to kafka topic of " + TOPIC);
+        } finally {
+            producer.flush();
+            //producer.close();
+        }
+    }
+    public static void runProducer4(String jSON,Producer producer) throws Exception {
+
+        //final Producer<String, String> producer = createProducer();
+        ProducerRecord<String, String> record = new ProducerRecord<>(TOPIC4, jSON);
 
         try {
             producer.send(record, null);
