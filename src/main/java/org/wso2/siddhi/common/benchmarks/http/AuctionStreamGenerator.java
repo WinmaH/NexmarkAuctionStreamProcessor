@@ -289,15 +289,16 @@ class AuctionStreamGenerator extends Thread{
             jsonDataItem.append(" } }");
             try {
 
-                if((int)Thread.currentThread().getId()%4 == 0) {
-                    KafkaMessageSender.runProducer1(jsonDataItem.toString(),producer1);
-                } else if ((int)Thread.currentThread().getId()%4 == 1) {
-                    KafkaMessageSender.runProducer2(jsonDataItem.toString(),producer1);
-                } else if ((int)Thread.currentThread().getId()%4 == 2) {
-                    KafkaMessageSender.runProducer3(jsonDataItem.toString(),producer1);
-                } else {
-                    KafkaMessageSender.runProducer4(jsonDataItem.toString(),producer1);
-                }
+//                if((int)Thread.currentThread().getId()%4 == 0) {
+//                    KafkaMessageSender.runProducer1(jsonDataItem.toString(),producer1);
+//                } else if ((int)Thread.currentThread().getId()%4 == 1) {
+//                    KafkaMessageSender.runProducer2(jsonDataItem.toString(),producer1);
+//                } else if ((int)Thread.currentThread().getId()%4 == 2) {
+//                    KafkaMessageSender.runProducer3(jsonDataItem.toString(),producer1);
+//                } else {
+//                    KafkaMessageSender.runProducer4(jsonDataItem.toString(),producer1);
+//                }
+                KafkaMessageSender.runProducer1(jsonDataItem.toString(),producer1);
 
                 log.info("Message from Stream3 sent to kafaka by "
                         + Thread.currentThread().getName());
